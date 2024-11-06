@@ -1,0 +1,80 @@
+add_newline = true
+format = "[ ](fg:#282a36 bg:#ffb86c)$singularity(fg:#282a36 bg:#ffb86c)$username[ ](fg:#ffb86c bg:#ff79c6)$hostname[](fg:#ff79c6 bg:#50fa7b)$directory[](fg:#50fa7b bg:#6e9bcb)$nix_shell[](fg:#6e9bcb bg:#f1fa8c)${custom.microconda}[](fg:#f1fa8c bg:#ff79c6)${custom.direnv}[](fg:#ff79c6 bg:#282a36ff)$git_branch$git_status$fill$time\n$character"
+
+[character]
+error_symbol = "[❯](bold #ff5555)"
+success_symbol = "[❯](bold #50fa7b)"
+
+[custom]
+
+command_timeout = 5000  # Czas w milisekundach
+ignore_timeout = false  # Czy ignorować timeout, można ustawić na `true`
+
+[custom.direnv]
+format = "[  ]($style)"
+style = "fg:#282a36 bg:#ff79c6"
+when = "env | grep -E '^DIRENV_FILE='"
+
+[custom.microconda]
+format = "[ $symbol ]($style)"
+style = "fg:#282a36 bg:#f1fa8c"
+symbol = ""
+when = "test -n \"$CONDA_PREFIX\""
+
+[directory]
+format = "[ $path ]($style)"
+style = "bold fg:#282a36 bg:#50fa7b"
+truncate_to_repo = false
+truncation_length = 6
+truncation_symbol = ".../"
+
+[fill]
+style = "bold #50fa7b"
+symbol = " "
+
+[git_branch]
+format = "[ $symbol$branch ]($style)"
+style = "bold fg:#ff79c6"
+
+[git_status]
+ahead = "$count⇡ "
+behind = "$count⇣ "
+conflicted = "$count= "
+deleted = "$count✘ "
+format = "[$conflicted$ahead$behind$untracked$modified$staged$renamed$deleted]($style)"
+modified = "$count! "
+renamed = "$count» "
+staged = "$count+ "
+stashed = "$count$ "
+style = "bold fg:#ff79c6"
+untracked = "$count? "
+
+[conda]
+format = '[$symbol$environment](dimmed green) '
+[container]
+format = '[$symbol \[$name\]]($style) '
+
+[hostname]
+format = "[$hostname ]($style)"
+ssh_only = false
+style = "bold fg:#282a36 bg:#ff79c6"
+
+[nix_shell]
+format = "[ 󱄅 ]($style)"
+style = "fg:#282a36 bg:#6e9bcb"
+
+[time]
+disabled = false
+format = "[ $time ]($style)"
+style = "bold fg:#ffb86c"
+time_format = "%X"
+
+[username]
+format = "[$user ]($style)"
+show_always = true
+style_user = "bold fg:#282a36 bg:#ffb86c"
+
+
+[singularity]
+format = '[📦   ]($style)'
+style = "bold fg:#282a36 bg:#ffb86c"

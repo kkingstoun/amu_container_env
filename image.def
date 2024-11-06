@@ -1,0 +1,214 @@
+Bootstrap: docker
+From: nvidia/cuda:12.5.0-devel-ubuntu22.04
+
+%environment
+    # Ustawienie zmiennych środowiskowych, które będą dostępne wewnątrz kontenera
+    export USERNAME=kkingstoun
+    export SINIMAGE_DIR=/mnt/local/$USERNAME/sinimage/home
+    export CONDA_PKGS_DIRS=$SINIMAGE_DIR/conda/pkgs
+    export CONDA_ENVS_DIRS=$SINIMAGE_DIR/conda/envs
+    export CONDA_CACHE_DIR=$SINIMAGE_DIR/.local/cache/conda
+    export PYTHONUSERBASE=$SINIMAGE_DIR/.local
+    export JUPYTER_RUNTIME_DIR=$SINIMAGE_DIR/.local/share/jupyter/runtime
+    export IPYTHONDIR=$SINIMAGE_DIR/.local/share/ipython
+    export JUPYTER_CONFIG_DIR=$SINIMAGE_DIR/.local/etc/jupyter
+    export JUPYTER_DATA_DIR=$SINIMAGE_DIR/.local/share/jupyter
+    export MPLCONFIGDIR=$SINIMAGE_DIR/.local/share/matplotlib
+    export XDG_CONFIG_HOME=$SINIMAGE_DIR/.local/etc
+    export XDG_DATA_HOME=$SINIMAGE_DIR/.local/share
+    export XDG_CACHE_HOME=$SINIMAGE_DIR/.local/cache
+    export JUPYTER_IP=0.0.0.0
+    export PATH=/opt/conda/bin:$PATH
+    export NVM_DIR=$SINIMAGE_DIR/.nvm
+    export CONDA_NO_PLUGIN=True
+
+%post
+    export SINIMAGE_DIR=/mnt/local/kkingstoun/sinimage
+    echo "SINIMAGE_DIR is set to $SINIMAGE_DIR"
+
+    apt-get update && apt-get install -y \
+    curl \
+    ca-certificates \
+    git \
+    bzip2 \
+    libx11-6 \
+    gcc \
+    llvm \
+    cmake \
+    libfftw3-dev \
+    exa \
+    rclone \
+    make \
+    g++ \
+    libsndfile1 \
+    wget 
+
+    # Install Miniconda
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+    bash ~/miniconda.sh -b -p /opt/conda && \
+    rm ~/miniconda.sh && \
+    export PATH="/opt/conda/bin:$PATH" && \
+    echo "export PATH=/opt/conda/bin:\$PATH" >> ~/.bashrc
+
+    # Install Python and pip with conda
+    conda config --file /.condarc --add channels defaults
+    conda config --file /.condarc --add channels conda-forge
+    conda update conda
+    conda install python=3.12 pip -y
+
+    # Clean up unnecessary files to reduce image size
+    conda clean --all -y
+
+%runscript
+    if [ ! -f ~/.bashrc ]; then
+        touch ~/.bashrc
+    fi
+    # Sekcja wykonywana po każdym uruchomieniu kontenera
+    export SINIMAGE_DIR=/mnt/local/kkingstoun/sinimage/home
+    export USERNAME=kkingstoun
+    export SINIMAGE_DIR=/mnt/local/$USERNAME/sinimage/home
+    export CONDA_PREFIX=$SINIMAGE_DIR/conda/envs/my_env
+    echo "SINIMAGE_DIR is set to $SINIMAGE_DIR"
+    
+    # rsync -avz /mnt/storage_2/project_data/pl0095-01/mateuszz/sinimage/.local/ $SINIMAGE_DIR/.local/ --progress
+
+    # Sprawdzenie, czy katalog SINIMAGE_DIR istnieje i tworzenie katalogów, jeśli nie istnieją
+    if [ ! -d "$SINIMAGE_DIR" ]; then
+        echo "MKDIR FOLDERS"
+        mkdir -p $SINIMAGE_DIR
+        mkdir -p /mnt/local/kkingstoun/sinimage/home
+        mkdir -p $SINIMAGE_DIR/.local/etc
+        mkdir -p $SINIMAGE_DIR/.local/share/jupyter/runtime
+        mkdir -p $SINIMAGE_DIR/.local/share/ipython
+        mkdir -p $SINIMAGE_DIR/.local/share/matplotlib
+        mkdir -p $SINIMAGE_DIR/.local/cache/conda
+        mkdir -p $SINIMAGE_DIR/conda/pkgs
+        mkdir -p $SINIMAGE_DIR/conda/envs
+        mkdir -p $SINIMAGE_DIR/conda/cache
+        mkdir -p $NVM_DIR
+        chmod -R 777 $SINIMAGE_DIR  # Zapewniamy pełny dostęp do katalogu
+    else
+        echo "Directory $SINIMAGE_DIR already exists."
+    fi
+
+    # Instalacja NVM i Node.js tylko, jeśli jeszcze nie są zainstalowane
+    if [ ! -d "$NVM_DIR" ]; then
+        echo "Installing NVM..."
+        mkdir -p $NVM_DIR
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
+        
+        # Source the nvm script for the current session
+        export NVM_DIR="$SINIMAGE_DIR/.nvm"  # Ensure NVM_DIR is properly set
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+        
+        # Ensure NVM is available by sourcing .bashrc in case any persistent changes were made
+        
+        # Install the desired Node.js version
+        nvm install 20
+        nvm use 20
+        nvm alias default 20
+        npm install --global code-server
+    else
+        echo "Directory $NVM_DIR already exists. Sourcing NVM..."
+        
+        # Re-source nvm to make sure it's available in the current session
+        export NVM_DIR="$SINIMAGE_DIR/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+        
+        # Use the default Node.js version (if already set)
+        nvm use default
+    fi
+
+    if [ ! -d "$CONDA_PREFIX" ]; then
+        echo "Tworzenie nowego środowiska Conda w $CONDA_PREFIX..."
+
+        # Ensure the Conda initialization script is sourced manually
+        if [ -f /opt/conda/etc/profile.d/conda.sh ]; then
+            . /opt/conda/etc/profile.d/conda.sh  # Manually source conda.sh
+        else
+            echo "Conda initialization script not found!"
+            exit 1
+        fi
+        
+        # Create the new Conda environment
+        conda create --prefix $CONDA_PREFIX -y
+        
+        # Manually activate the environment without relying on conda init
+        . /opt/conda/etc/profile.d/conda.sh
+        . ~/.bashrc
+        conda activate $CONDA_PREFIX
+
+
+        conda install conda-forge::nano -y
+        conda install conda-forge::zsh -y
+        conda install conda-forge::ruff -y
+        pip install pyzfn 
+        pip install uv 
+        pip install rust 
+        pip install pydantic 
+        pip install mypy 
+        pip install scipy
+        pip install pandas
+        conda install -c conda-forge rclone -y
+        conda install conda-forge::starship -y
+        conda install -c conda-forge jupyterlab -y
+        jupyter-lab build
+    else
+        # Sprawdzenie, czy środowisko Conda już istnieje
+        export PATH="/opt/conda/bin:$PATH"               ############ Sprwadizc czy nie powinno byc wyzej
+        if [ -f /opt/conda/etc/profile.d/conda.sh ]; then
+            . /opt/conda/etc/profile.d/conda.sh
+        else
+            echo "Conda initialization script not found!"
+        fi
+        conda activate $CONDA_PREFIX
+        # Initialize Conda properly
+
+        echo "Conda environment activated: $CONDA_PREFIX"
+    fi
+    . ~/.bashrc
+    echo "Running in activated conda environment: $(which python)"
+
+    # # Ensure NVM is loaded
+    # if ! grep -Fxq "export NVM_DIR=\"\$HOME/.nvm\"" ~/.bashrc; then
+    #     echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
+    #     echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
+    #     echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> ~/.bashrc
+    # fi
+
+    # # Avoid duplicate entries in .bashrc
+    # if ! grep -Fxq "source activate $SINIMAGE_DIR/conda/envs/my_env" ~/.bashrc; then
+    #     echo "source activate $SINIMAGE_DIR/conda/envs/my_env" >> ~/.bashrc
+    # fi
+
+    # if ! grep -Fxq "export PATH=/opt/conda/bin:\$PATH" ~/.bashrc; then
+    #     echo "export PATH=/opt/conda/bin:\$PATH" >> ~/.bashrc
+    # fi
+
+    # Configure code-server if not already done
+    CODE_SERVER_CONFIG=$SINIMAGE_DIR/.local/etc/code-server/config.yaml
+    export CODE_SERVER_CONFIG
+    if [ ! -f "$CODE_SERVER_CONFIG" ]; then
+        mkdir -p $(dirname "$CODE_SERVER_CONFIG")
+        echo "bind-addr: 0.0.0.0:8080" > "$CODE_SERVER_CONFIG"
+        echo "password: yourpassword" >> "$CODE_SERVER_CONFIG"
+        echo "auth: password" >> "$CODE_SERVER_CONFIG"
+    else
+        echo "CODE SERVER ALREADY CONFIGURED"
+    fi
+
+    mkdir -p $SINIMAGE_DIR/.config
+    cp ./starship.toml $SINIMAGE_DIR/.config/starship.toml
+    cp ./.zshrc $SINIMAGE_DIR/.zshrc
+    chmod 644 $SINIMAGE_DIR/.config/starship.toml
+
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/MathieuMoalic/amumax/main/install.sh)" -- $SINIMAGE_DIR/.local/bin
+    export PATH="$SINIMAGE_DIR/.local/bin:$PATH"
+    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
+
+    # Start bash session
+    echo "Kontener uruchomiony i środowisko skonfigurowane."
+    exec zsh
+    conda activate my_env
