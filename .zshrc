@@ -123,4 +123,5 @@ extract() {
 
 alias reload="source ~/.zshrc && echo 'Configuration reloaded!'"
 
-# conda activate my_env
+mkdir -p /tmp/runtime-$(id -u)
+export XDG_RUNTIME_DIR=/tmp/runtime-$(id -u)

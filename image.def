@@ -3,7 +3,7 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
 
 %environment
     # Ustawienie zmiennych środowiskowych, które będą dostępne wewnątrz kontenera
-    export USERNAME=kkingstoun
+    export USERNAME=${USER:-$(id -un)}
     export INTERNAL_DIR=/home/
     export SINIMAGE_DIR=/mnt/local/$USERNAME/sinimage/home
     export CONDA_PKGS_DIRS=$SINIMAGE_DIR/conda/pkgs
@@ -24,17 +24,15 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
     export PATH=/opt/conda/bin:$SINIMAGE_DIR/.local/bin:$PATH
     export CONDA_NO_PLUGIN=True
     export NVM_DIR=/opt/.nvm
+    export CODE_SERVER_CONFIG="/opt/code-server/config/config.yaml"
     
 %files
     ./starship.toml /opt/temp_files/starship.toml
     ./.zshrc /opt/temp_files/.zshrc
-    ./code-server/config.yaml /opt/temp_files/code-server/config.yaml
+    ./code-server/config.yaml /opt/code-server/config/config.yaml
     ./code-server/extensions-list.txt /opt/temp_files/extensions-list.txt
 
 %post
-    export SINIMAGE_DIR=/mnt/local/kkingstoun/sinimage
-    echo "SINIMAGE_DIR is set to $SINIMAGE_DIR"
-
     # ===========================
     # 1. Install System Packages
     # ===========================
@@ -79,7 +77,7 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
     # ===========================
     # 3. Install Amumax
     # ===========================
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/MathieuMoalic/amumax/main/install.sh)" -- /opt/conda/bin/
+    # sh -c "$(curl -fsSL https://raw.githubusercontent.com/MathieuMoalic/amumax/main/install.sh)" -- /opt/conda/bin/
 
     # ===========================
     # 4. Install Additional Conda Packages
@@ -113,45 +111,45 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
     # ===========================
     # 7. Install Code Server
     # ===========================
+    mkdir -p /opt/code/
+    export VSCODE_EXTENSIONS=/opt/code/
+
     curl -fOL https://github.com/coder/code-server/releases/download/v4.95.1/code-server_4.95.1_amd64.deb
     dpkg -i code-server_4.95.1_amd64.deb
 
-    # npm install --unsafe-perm --global code-server
-    # Directory where `extensions-list.txt` is located
+    # Install each extension listed in `extensions-list.txt`
+
+    
     EXTENSIONS_LIST=/opt/temp_files/extensions-list.txt
 
     # Install each extension listed in `extensions-list.txt`
     while IFS= read -r extension; do
         echo "Installing extension: $extension"
-        code-server --install-extension "$extension"
+        code-server --install-extension "$extension" --force
     done < "$EXTENSIONS_LIST"
 
-    # Set Dracula theme as the default
-    # This modifies the settings.json file in the code-server user-data directory
-    mkdir -p /mnt/local/kkingstoun/sinimage/home/.local/share/code-server/User
-    cat <<EOF > /mnt/local/kkingstoun/sinimage/home/.local/share/code-server/User/settings.json
-    {
-        "workbench.colorTheme": "Dracula"
-    }
-    EOF
+    cp -r /root/.config/code-server /opt/code-server-settings
+    cp -r /root/.local/share/code-server /opt/code-server-settings
+    chmod -R 755 /opt/code-server-settings
 
     # ===========================
     # 8. Install Python Packages with pip
     # ===========================
-    pip install pyzfn \
-                uv \
-                rust \
-                pydantic \
-                mypy \
-                scipy \
-                cmcrameri \
-                pandas
+    # pip install pyzfn \
+    #             uv \
+    #             rust \
+    #             pydantic \
+    #             mypy \
+    #             scipy \
+    #             cmcrameri \
+    #             seaborn \
+    #             pandas
 
     # ===========================
     # 9. Install JupyterLab and Build
     # ===========================
-    conda install -y -c conda-forge jupyterlab
-    jupyter-lab build
+    # conda install -y -c conda-forge jupyterlab
+    # jupyter-lab build
     
 %runscript
     # Przenieś pliki do nowego katalogu domowego, jeśli ich tam nie ma
@@ -163,11 +161,17 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
         cp /opt/temp_files/starship.toml "$SINIMAGE_DIR/.config/starship.toml"
         chmod 644 $SINIMAGE_DIR/.config/starship.toml
     fi
-
-    cp -f /opt/temp_files/code-server/config.yaml "$CODE_SERVER_CONFIG"
     
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
     . /opt/conda/etc/profile.d/conda.sh
+    
+    if [ ! -d "$HOME/.config/code-server" ]; then
+        cp -r /opt/code-server-settings/code-server "$HOME/.config/code-server"
+    fi
+    if [ ! -d "$HOME/.local/share/code-server" ]; then
+        cp -r /opt/code-server-settings/code-server "$HOME/.local/share/code-server"
+    fi
+    
     exec zsh

@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Zmienna środowiskowa SINIMAGE_DIR określa zapisywalny katalog użytkownika
-export SINIMAGE_DIR="/mnt/local/kkingstoun/sinimage/home"
+export USERNAME=${USER:-$(id -un)}
+export INTERNAL_DIR=/home/
+export SINIMAGE_DIR=/mnt/local/$USERNAME/sinimage/home
 
 # Tworzenie wymaganych katalogów w SINIMAGE_DIR, jeśli nie istnieją
 mkdir -p $SINIMAGE_DIR
@@ -26,5 +28,7 @@ singularity run \
   --no-home \
   --bind /mnt/storage_2/:/mnt/storage_2/  \
   --bind "$SINIMAGE_DIR:$SINIMAGE_DIR:rw" \
+  --bind ./code-server:$SINIMAGE_DIR/.local/etc/code-server:rw \
+  --bind ./code-server/settings.json:$SINIMAGE_DIR/.local/share/code-server/User/settings.json \
   --home "$SINIMAGE_DIR" \
-  out2.sif
+  image.sif
