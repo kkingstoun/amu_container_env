@@ -89,12 +89,8 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
     conda install -y -c conda-forge zoxide  # Directory navigation
     conda install -y conda-forge::bat       # Enhanced 'cat' command
     conda install -y conda-forge::starship  # Starship prompt
+    conda install -y conda-forge::atuin
 
-    # ===========================
-    # 5. Install Atuin Shell History Management
-    # ===========================
-    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
-    export PATH=$HOME/.atuin/bin:$PATH
     # ===========================
     # 6. Install NVM and Node.js
     # ===========================
@@ -158,21 +154,6 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
     jupyter-lab build
     
 %runscript
-    # Ensure the new home directory exists
-    mkdir -p $SINIMAGE_DIR
-    mkdir -p $SINIMAGE_DIR/.config
-    mkdir -p $SINIMAGE_DIR/conda/pkgs
-    mkdir -p $SINIMAGE_DIR/conda/envs
-    mkdir -p $SINIMAGE_DIR/.local/cache/conda
-    mkdir -p $SINIMAGE_DIR/.local/share/jupyter/runtime
-    mkdir -p $SINIMAGE_DIR/.local/share/ipython
-    mkdir -p $SINIMAGE_DIR/.local/etc/jupyter
-    mkdir -p $SINIMAGE_DIR/.local/share/jupyter
-    mkdir -p $SINIMAGE_DIR/.local/share/matplotlib
-    mkdir -p $SINIMAGE_DIR/.local/cache
-    mkdir -p $SINIMAGE_DIR/.local/etc/code-server
-
-
     # Przenieś pliki do nowego katalogu domowego, jeśli ich tam nie ma
     if [ ! -f "$SINIMAGE_DIR/home/.zshrc" ]; then
         cp /opt/temp_files/.zshrc "$SINIMAGE_DIR/.zshrc"

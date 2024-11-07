@@ -1,5 +1,4 @@
 eval "$(starship init zsh)"
-source $HOME/.atuin/bin/env
 eval "$(atuin init zsh)"
 eval "$(zoxide init zsh)"
 

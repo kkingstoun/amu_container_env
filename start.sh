@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Zmienna środowiskowa SINIMAGE_DIR określa zapisywalny katalog użytkownika
-export SINIMAGE_DIR="/mnt/local/kkingstoun/sinimage"
+export SINIMAGE_DIR="/mnt/local/kkingstoun/sinimage/home"
 
 # Tworzenie wymaganych katalogów w SINIMAGE_DIR, jeśli nie istnieją
 mkdir -p $SINIMAGE_DIR
-mkdir -p $SINIMAGE_DIR/home
+mkdir -p $SINIMAGE_DIR/.config
 mkdir -p $SINIMAGE_DIR/conda/pkgs
 mkdir -p $SINIMAGE_DIR/conda/envs
 mkdir -p $SINIMAGE_DIR/.local/cache/conda
@@ -24,11 +24,7 @@ chmod -R 777 $SINIMAGE_DIR
 # Uruchomienie kontenera Singularity z odpowiednimi bindami
 singularity run \
   --no-home \
-  --bind /mnt/local:/mnt/local:rw \
-  --bind "$SINIMAGE_DIR:/mnt/local/kkingstoun/sinimage:rw" \
   --bind /mnt/storage_2/:/mnt/storage_2/  \
-  --home "$SINIMAGE_DIR/home" \
-  --bind "$SINIMAGE_DIR/conda/pkgs:/opt/conda/pkgs:rw" \
-  --bind "$SINIMAGE_DIR/.local:/root/.local:rw" \
-  --bind "$SINIMAGE_DIR/home:/root:rw" \
+  --bind "$SINIMAGE_DIR:$SINIMAGE_DIR:rw" \
+  --home "$SINIMAGE_DIR" \
   out2.sif
