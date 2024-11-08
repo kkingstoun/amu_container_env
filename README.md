@@ -138,17 +138,26 @@ singularity run \
 
 ### GPU Support
 
-To enable GPU support, uncomment the line below in your environment:
+To enable GPU access within the container, execute the following commands:
 
 ```sh
-modprobe nvidia_uvm
+modprobe nvidia_uvm         # ENABLE GPU
+```
+
+Then, run the container with the necessary GPU bindings:
+
+```sh
+# Run the Singularity container with GPU support
+singularity run \
+  --nv \                    # ENABLE GPU
+  ...
 ```
 
 ---
 ## Project Roadmap
 
 - [X] **`Task 1`**: <strike>Initial setup of Amumax, Pyzfn, and Python environment.</strike>
-- [ ] **`Task 2`**: Implement GPU support verification and testing.
+- [X] **`Task 2`**: Implement GPU support verification and testing.
 - [ ] **`Task 3`**: Integrate additional Python libraries for enhanced data processing.
 
 ---
