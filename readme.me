@@ -1,0 +1,241 @@
+<div align="left" style="position: relative;">
+<img src="https://img.icons8.com/?size=512&id=55494&format=png" align="right" width="30%" style="margin: -20px 0 0 20px;">
+<h1>PCSS_CONTAINER_ENV</h1>
+<p align="left">
+	<em><code>❯ Containerized Development Environment for Amumax, Pyzfn, and Python</code></em>
+</p>
+<p align="left">
+	<img src="https://img.shields.io/github/license/kkingstoun/pcss_container_env?style=flat&logo=opensourceinitiative&logoColor=white&color=0080ff" alt="license">
+	<img src="https://img.shields.io/github/last-commit/kkingstoun/pcss_container_env?style=flat&logo=git&logoColor=white&color=0080ff" alt="last-commit">
+	<img src="https://img.shields.io/github/languages/top/kkingstoun/pcss_container_env?style=flat&color=0080ff" alt="repo-top-language">
+	<img src="https://img.shields.io/github/languages/count/kkingstoun/pcss_container_env?style=flat&color=0080ff" alt="repo-language-count">
+</p>
+<p align="left">Built with the tools and technologies:</p>
+<p align="left">
+	<img src="https://img.shields.io/badge/GNU%20Bash-4EAA25.svg?style=flat&logo=GNU-Bash&logoColor=white" alt="GNU%20Bash">
+</p>
+</div>
+<br clear="right">
+
+## Overview
+
+PCSS_CONTAINER_ENV is a highly portable, containerized development environment dedicated to running simulations and analyses using Amumax, Pyzfn, and Python. It is optimized for use in any environment supporting virtualization and is specifically designed for seamless integration with high-performance computing centers.
+
+---
+
+## Features
+
+- **Amumax Integration**: Supports efficient simulations of magnetization dynamics with Amumax.
+- **Python & Pyzfn**: Integrated Python environment with Pyzfn for data analysis and numerical experiments.
+- **Code-Server**: Remote VS Code access in a browser, allowing a familiar development environment from anywhere.
+- **GPU Acceleration**: Optional GPU support for improved simulation performance.
+- **Supercomputing Ready**: Configurable for PCSS infrastructure and other HPC centers, allowing optimal binding and resource management.
+
+---
+
+## Project Structure
+
+```sh
+└── pcss_container_env/
+    ├── code-server
+    │   ├── config.yaml
+    │   ├── extensions-list.txt
+    │   └── settings.json
+    ├── image.def
+    ├── starship.toml
+    └── start.sh
+```
+
+### Project Index
+<details open>
+	<summary><b><code>PCSS_CONTAINER_ENV/</code></b></summary>
+	<details>
+		<summary><b>__root__</b></summary>
+		<blockquote>
+			<table>
+			<tr>
+				<td><b><a href='https://github.com/kkingstoun/pcss_container_env/blob/master/starship.toml'>starship.toml</a></b></td>
+				<td>Configuration for the terminal prompt setup.</td>
+			</tr>
+			<tr>
+				<td><b><a href='https://github.com/kkingstoun/pcss_container_env/blob/master/image.def'>image.def</a></b></td>
+				<td>Singularity definition file to build the container image.</td>
+			</tr>
+			<tr>
+				<td><b><a href='https://github.com/kkingstoun/pcss_container_env/blob/master/start.sh'>start.sh</a></b></td>
+				<td>Startup script to initialize the container environment.</td>
+			</tr>
+			</table>
+		</blockquote>
+	</details>
+	<details>
+		<summary><b>code-server</b></summary>
+		<blockquote>
+			<table>
+			<tr>
+				<td><b><a href='https://github.com/kkingstoun/pcss_container_env/blob/master/code-server/config.yaml'>config.yaml</a></b></td>
+				<td>Configuration file for Code-Server settings.</td>
+			</tr>
+			<tr>
+				<td><b><a href='https://github.com/kkingstoun/pcss_container_env/blob/master/code-server/settings.json'>settings.json</a></b></td>
+				<td>VS Code settings for extensions and environment setup.</td>
+			</tr>
+			<tr>
+				<td><b><a href='https://github.com/kkingstoun/pcss_container_env/blob/master/code-server/extensions-list.txt'>extensions-list.txt</a></b></td>
+				<td>List of VS Code extensions to be installed in the container environment.</td>
+			</tr>
+			</table>
+		</blockquote>
+	</details>
+</details>
+
+---
+## Getting Started
+
+### Prerequisites
+
+Before getting started with pcss_container_env, ensure your runtime environment meets the following requirements:
+
+- **Singularity**: Ensure that Singularity is installed in your environment.
+- **GPU Acceleration (Optional)**: NVIDIA drivers installed for GPU usage.
+
+### Installation
+
+Install pcss_container_env using one of the following methods:
+
+**Build from source:**
+
+1. Clone the pcss_container_env repository:
+```sh
+❯ git clone https://github.com/kkingstoun/pcss_container_env
+```
+
+2. Navigate to the project directory:
+```sh
+❯ cd pcss_container_env
+```
+
+3. Pull the container image using Singularity:
+```sh
+❯ singularity pull --arch amd64 library://kkingstoun/amuenv/amuenv:latest
+```
+
+**Note**: You might encounter warnings regarding container verification, which can be safely ignored in most cases.
+
+### Usage
+
+1. Run the startup script to set up the container environment:
+```sh
+❯ ./start.sh
+```
+
+2. Start the Code-Server environment to work on your projects using a browser-based VS Code:
+```sh
+❯ code-server
+```
+
+You will see output similar to:
+```
+[2024-11-08T08:06:57.639Z] info  HTTP server listening on http://0.0.0.0:8080/
+[2024-11-08T08:06:57.639Z] info    - Authentication is enabled
+[2024-11-08T08:06:57.639Z] info      - Using password from /opt/code-server/config/config.yaml
+```
+Open your browser and navigate to `http://0.0.0.0:8080/` to access the VS Code environment.
+
+### Customizing Start Script
+
+To bind specific directories as needed, edit the `start.sh` script. For example, to bind `/mnt/storage_2/` to make it available inside the container:
+
+```sh
+--bind /mnt/storage_2/:/mnt/storage_2/  \
+```
+
+Ensure the required bindings remain unchanged:
+```sh
+singularity run \
+  --no-home \
+  --bind /mnt/storage_2/:/mnt/storage_2/  \
+  --bind "$SINIMAGE_DIR:$SINIMAGE_DIR:rw" \
+  --bind ./code-server:$SINIMAGE_DIR/.local/etc/code-server:rw \
+  --bind ./code-server/settings.json:$SINIMAGE_DIR/.local/share/code-server/User/settings.json \
+  --home "$SINIMAGE_DIR" \
+  amuenv_latest.sif
+```
+
+### GPU Support
+
+To enable GPU support, uncomment the line below in your environment:
+
+```sh
+# modprobe nvidia_uvm
+```
+
+---
+## Project Roadmap
+
+- [X] **`Task 1`**: <strike>Initial setup of Amumax, Pyzfn, and Python environment.</strike>
+- [ ] **`Task 2`**: Implement GPU support verification and testing.
+- [ ] **`Task 3`**: Integrate additional Python libraries for enhanced data processing.
+
+---
+
+## Contributing
+
+- **💬 [Join the Discussions](https://github.com/kkingstoun/pcss_container_env/discussions)**: Share your insights, provide feedback, or ask questions.
+- **🐛 [Report Issues](https://github.com/kkingstoun/pcss_container_env/issues)**: Submit bugs found or log feature requests for the `pcss_container_env` project.
+- **💡 [Submit Pull Requests](https://github.com/kkingstoun/pcss_container_env/blob/main/CONTRIBUTING.md)**: Review open PRs, and submit your own PRs.
+
+<details closed>
+<summary>Contributing Guidelines</summary>
+
+1. **Fork the Repository**: Start by forking the project repository to your github account.
+2. **Clone Locally**: Clone the forked repository to your local machine using a git client.
+   ```sh
+   git clone https://github.com/kkingstoun/pcss_container_env
+   ```
+3. **Create a New Branch**: Always work on a new branch, giving it a descriptive name.
+   ```sh
+   git checkout -b new-feature-x
+   ```
+4. **Make Your Changes**: Develop and test your changes locally.
+5. **Commit Your Changes**: Commit with a clear message describing your updates.
+   ```sh
+   git commit -m 'Implemented new feature x.'
+   ```
+6. **Push to github**: Push the changes to your forked repository.
+   ```sh
+   git push origin new-feature-x
+   ```
+7. **Submit a Pull Request**: Create a PR against the original project repository. Clearly describe the changes and their motivations.
+8. **Review**: Once your PR is reviewed and approved, it will be merged into the main branch. Congratulations on your contribution!
+</details>
+
+<details closed>
+<summary>Contributor Graph</summary>
+<br>
+<p align="left">
+   <a href="https://github.com{/kkingstoun/pcss_container_env/}graphs/contributors">
+      <img src="https://contrib.rocks/image?repo=kkingstoun/pcss_container_env">
+   </a>
+</p>
+</details>
+
+---
+
+## License
+
+This project is protected under the [MIT License](https://choosealicense.com/licenses/mit/). For more details, refer to the [LICENSE](https://choosealicense.com/licenses/mit/) file.
+
+---
+
+## Acknowledgments
+
+- Special thanks to the PCSS community for their support.
+- Built using [Amumax](https://github.com/MathieuMoalic/amumax), [Pyzfn](https://github.com/MathieuMoalic/pyzfn), and [Code-Server](https://github.com/coder/code-server).
+
+---
+
+## Authors
+
+- [Mateusz Zelent](https://github.com/kkingstoun/) & [Mathieu Moalic](https://github.com/MathieuMoalic)
+---
