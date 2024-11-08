@@ -1,4 +1,4 @@
-## amu_conTAINER_ENV
+## AMU_CONAINER_ENV
 
 <div align="center">
   <img src="./logo.png" alt="Project Logo" width="300px">
@@ -19,7 +19,7 @@ Built with the following tools and technologies:
 
 ## Overview
 
-amu_conTAINER_ENV is a highly portable, containerized development environment dedicated to running simulations and analyses using Amumax, Pyzfn, and Python. It is optimized for use in any environment supporting virtualization and is specifically designed for seamless integration with high-performance computing centers.
+AMU_CONAINER_ENV is a highly portable, containerized development environment dedicated to running simulations and analyses using Amumax, Pyzfn, and Python. It is optimized for use in any environment supporting virtualization and is specifically designed for seamless integration with high-performance computing centers.
 
 ---
 
@@ -48,7 +48,7 @@ amu_conTAINER_ENV is a highly portable, containerized development environment de
 
 ### Project Index
 <details open>
-	<summary><b>amu_conTAINER_ENV/</b></summary>
+	<summary><b>AMU_CONAINER_ENVTAINER_ENV/</b></summary>
 	<ul>
 		<li><b><a href='https://github.com/kkingstoun/amu_container_env/blob/master/starship.toml'>starship.toml</a></b>: Configuration for the terminal prompt setup.</li>
 		<li><b><a href='https://github.com/kkingstoun/amu_container_env/blob/master/image.def'>image.def</a></b>: Singularity definition file to build the container image.</li>
