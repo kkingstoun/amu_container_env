@@ -1,6 +1,8 @@
 ## PCSS_CONTAINER_ENV
 
-![Project Logo](https://img.icons8.com/?size=512&id=55494&format=png)
+<div align="center">
+  <img src="./logo.png" alt="Project Logo" width="300px">
+</div>
 
 **Containerized Development Environment for Amumax, Pyzfn, and Python**
 
