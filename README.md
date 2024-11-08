@@ -158,8 +158,9 @@ singularity run \
 
 - [X] **`Task 1`**: <strike>Initial setup of Amumax, Pyzfn, and Python environment.</strike>
 - [X] **`Task 2`**: Implement GPU support verification and testing.
-- [ ] **`Task 3`**: Integrate additional Python libraries for enhanced data processing.
-
+- [X] **`Task 3`**: Integrate additional Python libraries for enhanced data processing.
+- [ ] **`Task 4`**: Add [Boris Computational Spintronics](https://www.boris-spintronics.uk/) support. 
+- [ ] **`Task 4`**: Add [Neuralmag](https://gitlab.com/neuralmag/neuralmag) support. 
 ---
 
 ## Contributing
