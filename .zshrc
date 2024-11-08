@@ -2,8 +2,9 @@ eval "$(starship init zsh)"
 eval "$(atuin init zsh)"
 eval "$(zoxide init zsh)"
 
-# export PATH=$HOME/.local/bin:$PATH
-# export NVM_DIR="/opt/.nvm"
+bindkey "^[[1;5C" forward-word
+bindkey "^[[1;5D" backward-word
+
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
 stty stop undef # Disables ctrl+S to freeze the terminal
