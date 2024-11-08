@@ -1,4 +1,4 @@
-## PCSS_CONTAINER_ENV
+## amu_conTAINER_ENV
 
 <div align="center">
   <img src="./logo.png" alt="Project Logo" width="300px">
@@ -6,10 +6,10 @@
 
 **Containerized Development Environment for Amumax, Pyzfn, and Python**
 
-![License](https://img.shields.io/github/license/kkingstoun/pcss_container_env?style=flat&logo=opensourceinitiative&logoColor=white&color=0080ff)
-![Last Commit](https://img.shields.io/github/last-commit/kkingstoun/pcss_container_env?style=flat&logo=git&logoColor=white&color=0080ff)
-![Top Language](https://img.shields.io/github/languages/top/kkingstoun/pcss_container_env?style=flat&color=0080ff)
-![Languages Count](https://img.shields.io/github/languages/count/kkingstoun/pcss_container_env?style=flat&color=0080ff)
+![License](https://img.shields.io/github/license/kkingstoun/amu_container_env?style=flat&logo=opensourceinitiative&logoColor=white&color=0080ff)
+![Last Commit](https://img.shields.io/github/last-commit/kkingstoun/amu_container_env?style=flat&logo=git&logoColor=white&color=0080ff)
+![Top Language](https://img.shields.io/github/languages/top/kkingstoun/amu_container_env?style=flat&color=0080ff)
+![Languages Count](https://img.shields.io/github/languages/count/kkingstoun/amu_container_env?style=flat&color=0080ff)
 
 Built with the following tools and technologies:
 
@@ -19,7 +19,7 @@ Built with the following tools and technologies:
 
 ## Overview
 
-PCSS_CONTAINER_ENV is a highly portable, containerized development environment dedicated to running simulations and analyses using Amumax, Pyzfn, and Python. It is optimized for use in any environment supporting virtualization and is specifically designed for seamless integration with high-performance computing centers.
+amu_conTAINER_ENV is a highly portable, containerized development environment dedicated to running simulations and analyses using Amumax, Pyzfn, and Python. It is optimized for use in any environment supporting virtualization and is specifically designed for seamless integration with high-performance computing centers.
 
 ---
 
@@ -36,7 +36,7 @@ PCSS_CONTAINER_ENV is a highly portable, containerized development environment d
 ## Project Structure
 
 ```sh
-└── pcss_container_env/
+└── amu_container_env/
     ├── code-server
     │   ├── config.yaml
     │   ├── extensions-list.txt
@@ -48,16 +48,16 @@ PCSS_CONTAINER_ENV is a highly portable, containerized development environment d
 
 ### Project Index
 <details open>
-	<summary><b>PCSS_CONTAINER_ENV/</b></summary>
+	<summary><b>amu_conTAINER_ENV/</b></summary>
 	<ul>
-		<li><b><a href='https://github.com/kkingstoun/pcss_container_env/blob/master/starship.toml'>starship.toml</a></b>: Configuration for the terminal prompt setup.</li>
-		<li><b><a href='https://github.com/kkingstoun/pcss_container_env/blob/master/image.def'>image.def</a></b>: Singularity definition file to build the container image.</li>
-		<li><b><a href='https://github.com/kkingstoun/pcss_container_env/blob/master/start.sh'>start.sh</a></b>: Startup script to initialize the container environment.</li>
+		<li><b><a href='https://github.com/kkingstoun/amu_container_env/blob/master/starship.toml'>starship.toml</a></b>: Configuration for the terminal prompt setup.</li>
+		<li><b><a href='https://github.com/kkingstoun/amu_container_env/blob/master/image.def'>image.def</a></b>: Singularity definition file to build the container image.</li>
+		<li><b><a href='https://github.com/kkingstoun/amu_container_env/blob/master/start.sh'>start.sh</a></b>: Startup script to initialize the container environment.</li>
 		<li><b>code-server/</b>
 			<ul>
-				<li><b><a href='https://github.com/kkingstoun/pcss_container_env/blob/master/code-server/config.yaml'>config.yaml</a></b>: Configuration file for Code-Server settings.</li>
-				<li><b><a href='https://github.com/kkingstoun/pcss_container_env/blob/master/code-server/settings.json'>settings.json</a></b>: VS Code settings for extensions and environment setup.</li>
-				<li><b><a href='https://github.com/kkingstoun/pcss_container_env/blob/master/code-server/extensions-list.txt'>extensions-list.txt</a></b>: List of VS Code extensions to be installed in the container environment.</li>
+				<li><b><a href='https://github.com/kkingstoun/amu_container_env/blob/master/code-server/config.yaml'>config.yaml</a></b>: Configuration file for Code-Server settings.</li>
+				<li><b><a href='https://github.com/kkingstoun/amu_container_env/blob/master/code-server/settings.json'>settings.json</a></b>: VS Code settings for extensions and environment setup.</li>
+				<li><b><a href='https://github.com/kkingstoun/amu_container_env/blob/master/code-server/extensions-list.txt'>extensions-list.txt</a></b>: List of VS Code extensions to be installed in the container environment.</li>
 			</ul>
 		</li>
 	</ul>
@@ -68,25 +68,25 @@ PCSS_CONTAINER_ENV is a highly portable, containerized development environment d
 
 ### Prerequisites
 
-Before getting started with pcss_container_env, ensure your runtime environment meets the following requirements:
+Before getting started with amu_container_env, ensure your runtime environment meets the following requirements:
 
 - **Singularity**: Ensure that Singularity is installed in your environment.
 - **GPU Acceleration (Optional)**: NVIDIA drivers installed for GPU usage.
 
 ### Installation
 
-Install pcss_container_env using one of the following methods:
+Install amu_container_env using one of the following methods:
 
 **Build from source:**
 
-1. Clone the pcss_container_env repository:
+1. Clone the amu_container_env repository:
 ```sh
-git clone https://github.com/kkingstoun/pcss_container_env
+git clone https://github.com/kkingstoun/amu_container_env
 ```
 
 2. Navigate to the project directory:
 ```sh
-cd pcss_container_env
+cd amu_container_env
 ```
 
 3. Pull the container image using Singularity:
@@ -155,9 +155,9 @@ modprobe nvidia_uvm
 
 ## Contributing
 
-- **💬 [Join the Discussions](https://github.com/kkingstoun/pcss_container_env/discussions)**: Share your insights, provide feedback, or ask questions.
-- **🐛 [Report Issues](https://github.com/kkingstoun/pcss_container_env/issues)**: Submit bugs found or log feature requests for the `pcss_container_env` project.
-- **💡 [Submit Pull Requests](https://github.com/kkingstoun/pcss_container_env/blob/main/CONTRIBUTING.md)**: Review open PRs, and submit your own PRs.
+- **💬 [Join the Discussions](https://github.com/kkingstoun/amu_container_env/discussions)**: Share your insights, provide feedback, or ask questions.
+- **🐛 [Report Issues](https://github.com/kkingstoun/amu_container_env/issues)**: Submit bugs found or log feature requests for the `amu_container_env` project.
+- **💡 [Submit Pull Requests](https://github.com/kkingstoun/amu_container_env/blob/main/CONTRIBUTING.md)**: Review open PRs, and submit your own PRs.
 
 <details closed>
 <summary>Contributing Guidelines</summary>
@@ -165,7 +165,7 @@ modprobe nvidia_uvm
 1. **Fork the Repository**: Start by forking the project repository to your github account.
 2. **Clone Locally**: Clone the forked repository to your local machine using a git client.
    ```sh
-   git clone https://github.com/kkingstoun/pcss_container_env
+   git clone https://github.com/kkingstoun/amu_container_env
    ```
 3. **Create a New Branch**: Always work on a new branch, giving it a descriptive name.
    ```sh
@@ -188,8 +188,8 @@ modprobe nvidia_uvm
 <summary>Contributor Graph</summary>
 <br>
 <p align="left">
-   <a href="https://github.com/kkingstoun/pcss_container_env/graphs/contributors">
-      <img src="https://contrib.rocks/image?repo=kkingstoun/pcss_container_env">
+   <a href="https://github.com/kkingstoun/amu_container_env/graphs/contributors">
+      <img src="https://contrib.rocks/image?repo=kkingstoun/amu_container_env">
    </a>
 </p>
 </details>
