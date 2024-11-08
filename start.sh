@@ -31,4 +31,4 @@ singularity run \
   --bind ./code-server:$SINIMAGE_DIR/.local/etc/code-server:rw \
   --bind ./code-server/settings.json:$SINIMAGE_DIR/.local/share/code-server/User/settings.json \
   --home "$SINIMAGE_DIR" \
-  image.sif
+  amuenv_latest.sif
