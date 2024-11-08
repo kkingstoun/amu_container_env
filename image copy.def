@@ -3,7 +3,7 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
 
 %environment
     # Ustawienie zmiennych środowiskowych, które będą dostępne wewnątrz kontenera
-    export USERNAME=${USER:-$(id -un)}
+    export USERNAME=kkingstoun
     export INTERNAL_DIR=/home/
     export SINIMAGE_DIR=/mnt/local/$USERNAME/sinimage/home
     export CONDA_PKGS_DIRS=$SINIMAGE_DIR/conda/pkgs
@@ -24,16 +24,16 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
     export PATH=/opt/conda/bin:$SINIMAGE_DIR/.local/bin:$PATH
     export CONDA_NO_PLUGIN=True
     export NVM_DIR=/opt/.nvm
-    export CODE_SERVER_CONFIG="/opt/code-server/config/config.yaml"
-    export SHELL=/opt/conda/bin/zsh
-
+    
 %files
     ./starship.toml /opt/temp_files/starship.toml
     ./.zshrc /opt/temp_files/.zshrc
-    ./code-server/config.yaml /opt/code-server/config/config.yaml
-    ./code-server/extensions-list.txt /opt/temp_files/extensions-list.txt
+    ./code-server/config.yaml /opt/temp_files/code-server/config.yaml
 
 %post
+    export SINIMAGE_DIR=/mnt/local/kkingstoun/sinimage    
+    echo "SINIMAGE_DIR is set to $SINIMAGE_DIR"
+
     # ===========================
     # 1. Install System Packages
     # ===========================
@@ -84,15 +84,18 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
     # 4. Install Additional Conda Packages
     # ===========================
     conda install -y conda-forge::zsh       # ZSH shell
-    ln -s /opt/conda/bin/zsh /bin/zsh
     conda install -y -c conda-forge zoxide  # Directory navigation
     conda install -y conda-forge::bat       # Enhanced 'cat' command
     conda install -y conda-forge::starship  # Starship prompt
-    conda install -y conda-forge::atuin
-    conda install -y dnachun::btop
+    conda install -y conda-forge::ffmpeg    # Multimedia framework
 
     # ===========================
-    # 5. Install NVM and Node.js
+    # 5. Install Atuin Shell History Management
+    # ===========================
+    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
+
+    # ===========================
+    # 6. Install NVM and Node.js
     # ===========================
     # Set up NVM environment
     export NVM_DIR="/opt/.nvm"
@@ -111,31 +114,12 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
     nvm alias default 20
 
     # ===========================
-    # 6. Install Code Server
+    # 7. Install Code Server
     # ===========================
-    mkdir -p /opt/code/
-    export VSCODE_EXTENSIONS=/opt/code/
-
-    curl -fOL https://github.com/coder/code-server/releases/download/v4.95.1/code-server_4.95.1_amd64.deb
-    dpkg -i code-server_4.95.1_amd64.deb
-
-    # Install each extension listed in `extensions-list.txt`
-
-    
-    EXTENSIONS_LIST=/opt/temp_files/extensions-list.txt
-
-    # Install each extension listed in `extensions-list.txt`
-    while IFS= read -r extension; do
-        echo "Installing extension: $extension"
-        code-server --install-extension "$extension" --force
-    done < "$EXTENSIONS_LIST"
-
-    cp -r /root/.config/code-server /opt/code-server-settings
-    cp -r /root/.local/share/code-server /opt/code-server-settings
-    chmod -R 755 /opt/code-server-settings
+    npm install --unsafe-perm --global code-server
 
     # ===========================
-    # 7. Install Python Packages with pip
+    # 8. Install Python Packages with pip
     # ===========================
     pip install pyzfn \
                 uv \
@@ -144,16 +128,30 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
                 mypy \
                 scipy \
                 cmcrameri \
-                seaborn \
                 pandas
 
     # ===========================
-    # 8. Install JupyterLab and Build
+    # 9. Install JupyterLab and Build
     # ===========================
     conda install -y -c conda-forge jupyterlab
     jupyter-lab build
     
 %runscript
+    # Ensure the new home directory exists
+    mkdir -p $SINIMAGE_DIR
+    mkdir -p $SINIMAGE_DIR/.config
+    mkdir -p $SINIMAGE_DIR/conda/pkgs
+    mkdir -p $SINIMAGE_DIR/conda/envs
+    mkdir -p $SINIMAGE_DIR/.local/cache/conda
+    mkdir -p $SINIMAGE_DIR/.local/share/jupyter/runtime
+    mkdir -p $SINIMAGE_DIR/.local/share/ipython
+    mkdir -p $SINIMAGE_DIR/.local/etc/jupyter
+    mkdir -p $SINIMAGE_DIR/.local/share/jupyter
+    mkdir -p $SINIMAGE_DIR/.local/share/matplotlib
+    mkdir -p $SINIMAGE_DIR/.local/cache
+    mkdir -p $SINIMAGE_DIR/.local/etc/code-server
+
+
     # Przenieś pliki do nowego katalogu domowego, jeśli ich tam nie ma
     if [ ! -f "$SINIMAGE_DIR/home/.zshrc" ]; then
         cp /opt/temp_files/.zshrc "$SINIMAGE_DIR/.zshrc"
@@ -163,17 +161,12 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
         cp /opt/temp_files/starship.toml "$SINIMAGE_DIR/.config/starship.toml"
         chmod 644 $SINIMAGE_DIR/.config/starship.toml
     fi
+    cp -f /opt/temp_files/code-server/config.yaml "$CODE_SERVER_CONFIG"
+
     
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
     . /opt/conda/etc/profile.d/conda.sh
-    
-    if [ ! -d "$HOME/.config/code-server" ]; then
-        cp -r /opt/code-server-settings/code-server "$HOME/.config/code-server"
-    fi
-    if [ ! -d "$HOME/.local/share/code-server" ]; then
-        cp -r /opt/code-server-settings/code-server "$HOME/.local/share/code-server"
-    fi
     
     exec zsh
