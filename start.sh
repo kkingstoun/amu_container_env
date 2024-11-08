@@ -2,7 +2,6 @@
 
 # Zmienna środowiskowa SINIMAGE_DIR określa zapisywalny katalog użytkownika
 export USERNAME=${USER:-$(id -un)}
-export INTERNAL_DIR=/home/
 export SINIMAGE_DIR=/mnt/local/$USERNAME/sinimage/home
 
 # Tworzenie wymaganych katalogów w SINIMAGE_DIR, jeśli nie istnieją
@@ -25,11 +24,16 @@ chmod -R 777 $SINIMAGE_DIR
 modprobe nvidia_uvm         #ENABLE GPU
 # Uruchomienie kontenera Singularity z odpowiednimi bindami
 singularity run \
-  --nv \                    #ENABLE GPU
+  --nv \
   --no-home \
   --bind /mnt/storage_2/:/mnt/storage_2/  \
   --bind "$SINIMAGE_DIR:$SINIMAGE_DIR:rw" \
   --bind ./code-server:$SINIMAGE_DIR/.local/etc/code-server:rw \
+  --bind ./.zshrc:$SINIMAGE_DIR/.zshrc \
+  --bind ./code-server/config.yaml:$SINIMAGE_DIR/.config/code-server/config.yaml \
+  --bind ./starship.toml:$SINIMAGE_DIR/.config/starship.toml \
   --bind ./code-server/settings.json:$SINIMAGE_DIR/.local/share/code-server/User/settings.json \
   --home "$SINIMAGE_DIR" \
   amuenv_latest.sif
+
+singularity run amuenv_latest.sif
