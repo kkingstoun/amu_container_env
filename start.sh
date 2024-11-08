@@ -22,9 +22,10 @@ mkdir -p $SINIMAGE_DIR/.local/etc/code-server
 # Upewnij się, że katalogi są zapisywalne
 chmod -R 777 $SINIMAGE_DIR
 
-modprobe nvidia_uvm
+modprobe nvidia_uvm         #ENABLE GPU
 # Uruchomienie kontenera Singularity z odpowiednimi bindami
 singularity run \
+  --nv \                    #ENABLE GPU
   --no-home \
   --bind /mnt/storage_2/:/mnt/storage_2/  \
   --bind "$SINIMAGE_DIR:$SINIMAGE_DIR:rw" \
