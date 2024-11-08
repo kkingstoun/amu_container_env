@@ -159,6 +159,28 @@ singularity run \
   ...
 ```
 
+
+## Recommended Practice for PCSS
+
+Due to frequent issues with read/write speeds on the PCSS storage, it is recommended to clone the repository to a local disk on the Proxima nodes:
+
+🚀 **Executing command:**
+
+```sh
+srun -n 1 -c 20 --mem=100G -t 24:00:00 --partition=proxima --gres gpu:1 --pty /bin/bash
+```
+
+Then, create a local directory to work in:
+
+```sh
+mkdir -p /mnt/local/$(whoami)/env/
+```
+
+After creating the directory, execute the container installation instructions (git clone and Singularity commands) within this folder.
+
+Ensure that only the necessary storage directories with data are mounted to minimize potential bottlenecks.
+
+
 ---
 ## Project Roadmap
 
