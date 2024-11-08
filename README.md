@@ -32,19 +32,25 @@ AMU_CONAINER_ENV is a highly portable, containerized development environment ded
 - **Supercomputing Ready**: Configurable for PCSS infrastructure and other HPC centers, allowing optimal binding and resource management.
 
 ---
-
 ## Project Structure
 
 ```sh
-└── amu_container_env/
+└── pcss_container_env/
     ├── code-server
     │   ├── config.yaml
     │   ├── extensions-list.txt
     │   └── settings.json
     ├── image.def
     ├── starship.toml
+    ├── .zshrc
     └── start.sh
 ```
+
+### Description
+
+- **code-server/**: Contains configuration files (`config.yaml`, `extensions-list.txt`, `settings.json`) that are mounted into the container to set up and customize the VS Code environment. This allows for persistent changes to extensions, editor settings, and other customizations, making the development environment adaptable and user-friendly.
+- **starship.toml**: Configuration for the terminal prompt (`starship`) used inside the container. It is mounted to ensure a consistent and personalized terminal prompt across sessions.
+- **.zshrc**: Shell configuration file for Zsh. This is mounted to provide custom aliases, environment variables, and settings, ensuring the user's shell environment is consistently configured every time the container is started.
 
 ### Project Index
 <details open>
