@@ -2,7 +2,7 @@ Bootstrap: docker
 From: nvidia/cuda:12.6.2-base-ubuntu22.04
 
 %environment
-    # Ustawienie zmiennych środowiskowych, które będą dostępne wewnątrz kontenera
+    # Set environment variables accessible within the container
     export USERNAME=${USER:-$(id -un)}
     export INTERNAL_DIR=/home/
     export SINIMAGE_DIR=/mnt/local/$USERNAME/sinimage/home
@@ -29,8 +29,14 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
     export XDG_STATE_HOME=$SINIMAGE_DIR/.local/state
     export CUDA_CACHE_PATH=$SINIMAGE_DIR/.cache/nv
     export TMPDIR=$SINIMAGE_DIR/.local/tmp
+    export mumax_port=35999
+    export code_port=8090
+    export SCREENDIR=$SINIMAGE_DIR/tmp
+    export ZELLIJ_TMP_DIR=$HOME/.zellij
+    export RUST_BACKTRACE=1
 
 %files
+    # Copy configuration files to container
     ./starship.toml /opt/temp_files/starship.toml
     ./.zshrc /opt/temp_files/.zshrc
     ./code-server/config.yaml /opt/code-server/config/config.yaml
@@ -56,7 +62,11 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
         make \
         g++ \
         libsndfile1 \
+        screen \
+        tmux \
+        autossh \
         wget 
+
     # ===========================
     # 2. Install Miniconda
     # ===========================
@@ -93,6 +103,7 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
     conda install -y conda-forge::starship  # Starship prompt
     conda install -y conda-forge::atuin
     conda install -y dnachun::btop
+    conda install conda-forge::zellij
 
     # ===========================
     # 5. Install NVM and Node.js
@@ -123,11 +134,7 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
     dpkg -i code-server_4.95.1_amd64.deb
 
     # Install each extension listed in `extensions-list.txt`
-
-    
     EXTENSIONS_LIST=/opt/temp_files/extensions-list.txt
-
-    # Install each extension listed in `extensions-list.txt`
     while IFS= read -r extension; do
         echo "Installing extension: $extension"
         code-server --install-extension "$extension" --force
@@ -157,9 +164,13 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
     jupyter-lab build
     
 %runscript
-    # Przenieś pliki do nowego katalogu domowego, jeśli ich tam nie ma
+    # Move configuration files to a new home directory if they don't exist there
     if [ ! -f "$SINIMAGE_DIR/home/.zshrc" ]; then
         cp /opt/temp_files/.zshrc "$SINIMAGE_DIR/.zshrc"
+        mkdir $SCREENDIR
+        chmod 700 $SCREENDIR
+        mkdir -p $HOME/.zellij
+        chmod 700 $HOME/.zellij    
     fi
 
     if [ ! -f "$SINIMAGE_DIR/home/.config/starship.toml" ]; then
@@ -167,16 +178,13 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
         chmod 644 $SINIMAGE_DIR/.config/starship.toml
     fi
     
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Load nvm
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # Load nvm bash_completion
 
     . /opt/conda/etc/profile.d/conda.sh
     
-    if [ ! -d "$HOME/.config/code-server" ]; then
-        cp -r /opt/code-server-settings/code-server "$HOME/.config/code-server"
-    fi
     if [ ! -d "$HOME/.local/share/code-server" ]; then
-        cp -r /opt/code-server-settings/code-server "$HOME/.local/share/code-server"
+        rclone copy /opt/code-server-settings/code-server "$HOME/.local/share/code-server"
     fi
     
     exec zsh

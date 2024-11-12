@@ -21,17 +21,20 @@ mkdir -p $SINIMAGE_DIR/.local/etc/code-server
 # Upewnij się, że katalogi są zapisywalne
 chmod -R 777 $SINIMAGE_DIR
 
-modprobe nvidia_uvm         #ENABLE GPU
+# modprobe nvidia_uvm         #ENABLE GPU
 # Uruchomienie kontenera Singularity z odpowiednimi bindami
 singularity run \
-  --nv \
   --no-home \
+  --bind /dev/pts \
   --bind /mnt/storage_2/:/mnt/storage_2/  \
   --bind "$SINIMAGE_DIR:$SINIMAGE_DIR:rw" \
   --bind ./code-server:$SINIMAGE_DIR/.local/etc/code-server:rw \
-  --bind ./.zshrc:$SINIMAGE_DIR/.zshrc \
-  --bind ./code-server/config.yaml:$SINIMAGE_DIR/.config/code-server/config.yaml \
-  --bind ./starship.toml:$SINIMAGE_DIR/.config/starship.toml \
-  --bind ./code-server/settings.json:$SINIMAGE_DIR/.local/share/code-server/User/settings.json \
+  --bind ./.zshrc:$SINIMAGE_DIR/.zshrc:rw \
+  --bind ./.ssh/id_rsa:$SINIMAGE_DIR/.ssh/id_rsa \
+  --bind ./.ssh/config:$SINIMAGE_DIR/.ssh/config \
+  --bind ./run_codeserver.sh:$SINIMAGE_DIR/run_codeserver.sh \
+  --bind ./code-server/config.yaml:$SINIMAGE_DIR/.config/code-server/config.yaml:rw \
+  --bind ./starship.toml:$SINIMAGE_DIR/.config/starship.toml:rw \
+  --bind ./code-server/settings.json:$SINIMAGE_DIR/.local/share/code-server/User/settings.json:rw \
   --home "$SINIMAGE_DIR" \
-  amuenv_latest.sif
+  out2.sif
