@@ -37,4 +37,4 @@ singularity run \
   --bind ./starship.toml:$SINIMAGE_DIR/.config/starship.toml:rw \
   --bind ./code-server/settings.json:$SINIMAGE_DIR/.local/share/code-server/User/settings.json:rw \
   --home "$SINIMAGE_DIR" \
-  out2.sif
+  singularity run amuenv_latest.sif
