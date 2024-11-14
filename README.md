@@ -159,6 +159,110 @@ singularity run \
   ...
 ```
 
+## Preparing Windows Client
+
+
+## Overview
+The `Install-SecureSSHServer.ps1` script sets up a secure SSH server on a Windows client, creating a user with SSH key-based access, and configuring necessary permissions and environment settings. This guide will walk you through the prerequisites and installation steps required to run the script effectively.
+
+# Secure SSH Server Installation Script (PowerShell)
+
+⚠️ **Warning: Experimental Software**  
+This script is provided as experimental software for automated SSH server configuration on Windows. The author assumes no responsibility for any issues that may arise, including potential system instability or security vulnerabilities. Use this script at your own risk and ensure you have proper system backups before proceeding.
+
+---
+
+## Prerequisites
+- **Operating System**: Windows 10/11 or Windows Server 2019/2022
+- **PowerShell**: Version 5.1 or newer
+- **Administrator Privileges**: The script must be run as an administrator.
+
+## Usage
+
+1. Open PowerShell as an administrator.
+2. Navigate to the directory containing the script and run the following commands:
+
+### 1. Prepare the Password
+The new SSH user requires a secure password, which will be used in the script. Define this password in PowerShell using the `ConvertTo-SecureString` command.
+
+Example:
+```powershell
+$NewUserPassword = ConvertTo-SecureString "YourStrongPassword@#!" -AsPlainText -Force
+```
+
+### 2. Run the Script
+Change to the directory containing the Install-SecureSSHServer.ps1 script and execute it with the required parameters.
+
+Example:
+
+```powershell
+cd windows-client/ssh_server/src/
+
+.\Install-SecureSSHServer.ps1 `
+    -NewUsername "sshuser" `
+    -NewUserPassword $NewUserPassword `
+    -Force `
+    -sshKeyFolderPath "C:\sshuser"
+```
+
+### Script Parameters
+- **`-NewUsername`**: Specifies the username to be created for SSH access. Example: `"sshuser"`
+- **`-NewUserPassword`**: The password for the SSH user, supplied as a `SecureString`.
+- **`-Force`**: (Optional) If provided, removes any existing user with the specified username before creating a new user.
+- **`-sshKeyFolderPath`**: (Optional) Directory where SSH keys will be stored. Default is `"C:\sshuser"`.
+
+## Process Overview and Steps
+
+### 1. Install and Configure OpenSSH Components
+   - The script checks if OpenSSH Client and Server are installed. If they’re missing, they are added to the system.
+   - It configures the SSH service to start automatically with the system.
+
+### 2. Create and Configure SSH User
+   - **User Creation**: A new local user account is created with the provided username and password.
+   - **Home Directory Initialization**: The script ensures that the user’s home directory is properly initialized. 
+   - **SSH Group Membership**: The user is added to a specific SSH group (`SSH Users`), which is created if it doesn’t exist.
+
+### 3. Set Permissions for SSH Directory
+   - **Permissions Setup**: The script modifies permissions on the SSH configuration directory (`C:\ProgramData\ssh`) to ensure only administrators and the system have full access.
+   - **Permission Confirmation**: If `-NoConfirm` is not set, the user is prompted to confirm these changes.
+
+### 4. Configure sshd_config for Secure Access
+   - **Backup Configuration**: A backup of the current `sshd_config` file is created.
+   - **Configuration Changes**: Updates are applied to enable key-based authentication, disable root login, and restrict SSH access to members of the `SSH Users` group.
+   - **Comparison Display**: The script displays a side-by-side comparison of the current and new `sshd_config` settings, prompting for user confirmation if necessary.
+
+### 5. Configure and Confirm SSH Port
+   - **Port Configuration**: The SSH port is checked, and the script provides an option to change it if it’s set to the default (22).
+   - **Firewall Rule Setup**: A new firewall rule is created to allow inbound connections on the selected port.
+
+### 6. Generate SSH Key Pair
+   - **Key Generation**: If an SSH key pair does not already exist in the specified folder, the script generates one.
+   - **Permissions**: Permissions on the generated key files are restricted to ensure they’re only accessible to the system and the SSH user.
+
+### 7. Configure User’s .ssh Folder
+   - **.ssh Directory Setup**: The script creates the `.ssh` folder in the user's home directory.
+   - **Authorized Keys**: The public key is appended to the `authorized_keys` file to allow passwordless login.
+   - **Permissions**: Permissions on `authorized_keys` are set to allow only the SSH user and the system to access it.
+
+### 8. Test SSH Connection
+   - The script performs a test SSH connection to `localhost` using the newly created user and key to confirm the setup was successful.
+
+---
+
+## File Modifications
+
+- **`C:\ProgramData\ssh\sshd_config`**: The script backs up and modifies this file to enforce secure settings.
+- **`C:\Users\[NewUsername]\.ssh\authorized_keys`**: This file is updated with the public key to enable SSH access.
+- **Firewall Rules**: A new firewall rule may be added if the SSH port is modified from the default.
+
+---
+
+## Notes
+- **Key Storage**: SSH keys are generated and stored in the specified folder (`-sshKeyFolderPath`) with restricted access permissions.
+- **Logging**: The script logs its actions and results to a log file (`$LogPath`), with detailed error handling and informational messages.
+- **Administrator Access**: Because the script modifies system files and directories, it must be run with elevated privileges.
+
+--- 
 
 ## Recommended Practice for PCSS
 
