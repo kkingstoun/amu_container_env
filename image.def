@@ -89,9 +89,23 @@ From: nvidia/cuda:12.6.2-base-ubuntu22.04
     conda clean --all -y
 
     # ===========================
-    # 3. Install Amumax
+    # 3. Install Amumax and Mumax
     # ===========================
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/MathieuMoalic/amumax/main/install.sh)" -- /opt/conda/bin/
+    
+    # Download and install Mumax3
+    MUMAX_VERSION="mumax3.10_linux_cuda11.0"
+    MUMAX_URL="https://mumax.ugent.be/mumax3-binaries/${MUMAX_VERSION}.tar.gz"
+    MUMAX_INSTALL_DIR="/opt/conda/bin/mumax3"
+
+    # Create installation directory in /opt/conda/bin
+    mkdir -p $MUMAX_INSTALL_DIR
+
+    # Download and extract Mumax3 directly into /opt/conda/bin
+    curl -L $MUMAX_URL | tar -xz -C /opt/conda/bin --strip-components=1
+
+    # Ensure mumax3 binary is accessible
+    chmod +x /opt/conda/bin/mumax3
 
     # ===========================
     # 4. Install Additional Conda Packages

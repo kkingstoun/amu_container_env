@@ -1,3 +1,5 @@
+### Origin file from https://stackoverflow.com/questions/28989750/running-powershell-as-another-user-and-launching-a-script
+
 <#
 
 .SYNOPSIS

@@ -25,7 +25,6 @@ chmod -R 777 $SINIMAGE_DIR
 # Uruchomienie kontenera Singularity z odpowiednimi bindami
 singularity run \
   --no-home \
-  --bind /dev/pts \
   --bind /mnt/storage_2/:/mnt/storage_2/  \
   --bind "$SINIMAGE_DIR:$SINIMAGE_DIR:rw" \
   --bind ./code-server:$SINIMAGE_DIR/.local/etc/code-server:rw \
@@ -37,4 +36,4 @@ singularity run \
   --bind ./starship.toml:$SINIMAGE_DIR/.config/starship.toml:rw \
   --bind ./code-server/settings.json:$SINIMAGE_DIR/.local/share/code-server/User/settings.json:rw \
   --home "$SINIMAGE_DIR" \
-  singularity run amuenv_latest.sif
+  out2.sif

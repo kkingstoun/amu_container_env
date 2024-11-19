@@ -1,3 +1,5 @@
 *.sif
 .ssh/id_rsa
 .ssh/config
+*.old
+backups

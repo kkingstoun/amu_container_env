@@ -1,50 +1,134 @@
 #!/bin/bash
 
-# Definicje portów
-export mumax_port=35999
-export code_port=8090
+# Configuration
 export remote_host="orion"
+declare -A services=(
+    ["code-server"]="8090"
+    ["amumax"]="35999"
+)
 
-# Funkcja do uruchomienia autossh z odwrotnym tunelowaniem
+# Port management
+used_ports=()
+pid_file="/tmp/port_forward_$USER.pid"
+
+# Improved tunnel setup with retry and monitoring
 setup_reverse_tunnel() {
-    local local_port=$1
-    local remote_port=$1
-    autossh -M 0 -f -N -R ${remote_port}:localhost:${local_port} ${remote_host}
-    echo "Reverse SSH tunnel established for port ${local_port} on ${remote_host}:${remote_port}"
+    local service=$1
+    local local_port=$2
+    local remote_port=$2
+    local retry_count=0
+    local max_retries=3
+
+    # Check if port is already in use
+    while nc -z localhost $local_port 2>/dev/null; do
+        local_port=$((local_port + 1))
+        if [[ $local_port -gt $((remote_port + 10)) ]]; then
+            echo "ERROR: Could not find available port for $service"
+            return 1
+        fi
+    done
+
+    # Setup tunnel with retry logic
+    while [[ $retry_count -lt $max_retries ]]; do
+        autossh -M 0 -f -N -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" \
+                -R ${remote_port}:localhost:${local_port} ${remote_host}
+        
+        if [[ $? -eq 0 ]]; then
+            echo "Reverse SSH tunnel established for $service on ${remote_host}:${remote_port} (local: ${local_port})"
+            used_ports+=($local_port)
+            return 0
+        fi
+        
+        ((retry_count++))
+        echo "Retry $retry_count/$max_retries for $service tunnel"
+        sleep 5
+    done
+    
+    echo "ERROR: Failed to establish tunnel for $service after $max_retries attempts"
+    return 1
 }
 
-# 1. Uruchomienie code-server na lokalnym porcie $code_port
-echo "Starting code-server on port ${code_port}..."
-code-server --port ${code_port} --host 0.0.0.0 --auth none &
-code_server_pid=$!
-echo "code-server PID: ${code_server_pid}"
+# Enhanced service startup
+start_service() {
+    local service=$1
+    local port=${services[$service]}
+    
+    case $service in
+        "code-server")
+            echo "Starting $service on port ${port}..."
+            code-server --port ${port} --host 0.0.0.0 --auth none &
+            local pid=$!
+            echo "$service:$pid" >> $pid_file
+            setup_reverse_tunnel $service $port
+            ;;
+        "amumax")
+            echo "Starting $service on port ${port}..."
+            amumax -http :${port} &
+            local pid=$!
+            echo "$service:$pid" >> $pid_file
+            setup_reverse_tunnel $service $port
+            ;;
+        *)
+            echo "Unknown service: $service"
+            return 1
+            ;;
+    esac
+}
 
-# 2. Ustawienie odwrotnego tunelowania dla code-server
-setup_reverse_tunnel ${code_port}
-
-# 3. Uruchomienie amumax na lokalnym porcie $mumax_port
-echo "Starting amumax on port ${mumax_port}..."
-amumax -http :${mumax_port} &
-mumax_pid=$!
-echo "amumax PID: ${mumax_pid}"
-
-# 4. Ustawienie odwrotnego tunelowania dla amumax
-setup_reverse_tunnel ${mumax_port}
-
-# Funkcja czyszcząca po zakończeniu
+# Improved cleanup function
 cleanup() {
-    echo "Stopping code-server and amumax..."
-    kill ${code_server_pid}
-    kill ${mumax_pid}
-    echo "Tunnels and services stopped."
+    echo "Stopping services and tunnels..."
+    
+    # Kill all services
+    if [[ -f $pid_file ]]; then
+        while IFS=: read -r service pid; do
+            if kill -0 $pid 2>/dev/null; then
+                echo "Stopping $service (PID: $pid)"
+                kill $pid
+            fi
+        done < $pid_file
+        rm $pid_file
+    fi
+
+    # Kill all autossh processes for this user
+    pkill -u $USER autossh
+    
+    # Clean up used ports
+    for port in "${used_ports[@]}"; do
+        fuser -k $port/tcp 2>/dev/null
+    done
+    
+    echo "Cleanup complete."
 }
 
-# Uruchom cleanup na zakończenie skryptu lub przerwanie
-trap cleanup EXIT
+# Set up signal handling
+trap cleanup EXIT INT TERM
 
-# Informacja o dostępnych usługach
-echo "code-server is accessible on ${remote_host}:$code_port"
-echo "amumax is accessible on ${remote_host}:$mumax_port"
+# Main execution
+echo "Starting services with port forwarding..."
 
-# Keep the script running to maintain the background processes
+# Create clean PID file
+> $pid_file
+
+# Start all configured services
+for service in "${!services[@]}"; do
+    start_service $service
+done
+
+# Status report
+echo -e "\nService Status:"
+echo "----------------------------------------"
+if [[ -f $pid_file ]]; then
+    while IFS=: read -r service pid; do
+        if kill -0 $pid 2>/dev/null; then
+            echo "$service is running (PID: $pid)"
+            echo "Access at ${remote_host}:${services[$service]}"
+        else
+            echo "$service failed to start"
+        fi
+    done < $pid_file
+fi
+echo "----------------------------------------"
+
+# Keep script running
 wait
