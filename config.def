@@ -1,0 +1,67 @@
+Bootstrap: localimage
+From: base.sif
+
+%environment
+    export JUPYTER_IP=0.0.0.0
+    export CONDA_PREFIX=/opt/conda
+    export CONDA_NO_PLUGIN=True
+    export NVM_DIR=/opt/.nvm
+    export CODE_SERVER_CONFIG="/opt/code-server/config/config.yaml"
+    export SHELL=/opt/conda/bin/zsh
+    export mumax_port=35999
+    export code_port=8090
+    export RUST_BACKTRACE=1
+    export NVM_DIR="/opt/.nvm"
+    export PATH="/opt/conda/bin:$PATH"
+
+%files
+    ./starship.toml /opt/temp_files/starship.toml
+    ./.zshrc /opt/temp_files/.zshrc
+    ./code-server/config.yaml /opt/code-server/config/config.yaml
+    ./code-server/extensions-list.txt /opt/temp_files/extensions-list.txt
+
+%post
+    # ===========================
+    # 1. Install NVM and Node.js
+    # ===========================
+
+    export NVM_DIR="/opt/.nvm"
+    export PATH="/opt/conda/bin:$PATH"
+    git clone https://github.com/nvm-sh/nvm.git "$NVM_DIR"
+    cd "$NVM_DIR"
+    git checkout `git describe --abbrev=0 --tags --match "v[0-9]*" $(git rev-list --tags --max-count=1)`
+    . "$NVM_DIR/nvm.sh"
+
+    # Load NVM scripts for persistent availability
+    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # Loads nvm
+    [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"  # Loads nvm bash_completion
+
+    # Install and set up Node.js version 20
+    nvm install 20
+    nvm use 20
+    nvm alias default 20
+
+    # ===========================
+    # 2. Install Code Server
+    # ===========================
+    mkdir -p /opt/code/
+    export VSCODE_EXTENSIONS=/opt/code/
+
+    curl -fOL https://github.com/coder/code-server/releases/download/v4.95.1/code-server_4.95.1_amd64.deb
+    dpkg -i code-server_4.95.1_amd64.deb
+
+    # Install each extension listed in `extensions-list.txt`
+    EXTENSIONS_LIST=/opt/temp_files/extensions-list.txt
+    while IFS= read -r extension; do
+        echo "Installing extension: $extension"
+        code-server --install-extension "$extension" --force
+    done < "$EXTENSIONS_LIST"
+
+    cp -r /root/.config/code-server /opt/code-server-settings
+    cp -r /root/.local/share/code-server /opt/code-server-settings
+    chmod -R 755 /opt/code-server-settings
+
+    # ===========================
+    # 3. Build JupyterLab
+    # ===========================
+    jupyter-lab build

@@ -1,0 +1,80 @@
+Bootstrap: localimage
+From: config.sif
+
+%environment
+    export JUPYTER_IP=0.0.0.0
+    export CONDA_PREFIX=/opt/conda
+    export CONDA_NO_PLUGIN=True
+    export NVM_DIR=/opt/.nvm
+    export CODE_SERVER_CONFIG="/opt/code-server/config/config.yaml"
+    export SHELL=/opt/conda/bin/zsh
+    export mumax_port=35999
+    export code_port=8090
+    export RUST_BACKTRACE=1
+    export NVM_DIR="/opt/.nvm"
+    export PATH="/opt/conda/bin":$PATH
+
+%files
+    ./starship.toml /opt/temp_files/starship.toml
+    ./.zshrc /opt/temp_files/.zshrc
+    ./code-server/config.yaml /opt/code-server/config/config.yaml
+
+%runscript
+    export INTERNAL_DIR=/home/
+    export CONDA_PKGS_DIRS=$SINIMAGE_DIR/conda/pkgs
+    export CONDA_ENVS_DIRS=$SINIMAGE_DIR/conda/envs
+    export CONDA_CACHE_DIR=$SINIMAGE_DIR/.local/cache/conda
+    export PYTHONUSERBASE=$SINIMAGE_DIR/.local
+    export JUPYTER_RUNTIME_DIR=$SINIMAGE_DIR/.local/share/jupyter/runtime
+    export IPYTHONDIR=$SINIMAGE_DIR/.local/share/ipython
+    export JUPYTER_CONFIG_DIR=$SINIMAGE_DIR/.local/etc/jupyter
+    export JUPYTER_DATA_DIR=$SINIMAGE_DIR/.local/share/jupyter
+    export MPLCONFIGDIR=$SINIMAGE_DIR/.local/share/matplotlib
+    export XDG_CONFIG_HOME=$SINIMAGE_DIR/.local/etc
+    export XDG_DATA_HOME=$SINIMAGE_DIR/.local/share
+    export XDG_CACHE_HOME=$SINIMAGE_DIR/.local/cache
+    export CODE_SERVER_CONFIG=$SINIMAGE_DIR/.local/etc/code-server/config.yaml
+    export PATH=/opt/conda/bin:$SINIMAGE_DIR/.local/bin:$PATH
+    export XDG_STATE_HOME=$SINIMAGE_DIR/.local/state
+    export CUDA_CACHE_PATH=$SINIMAGE_DIR/.cache/nv
+    export TMPDIR=$SINIMAGE_DIR/.local/tmp
+    export HOME=$SINIMAGE_DIR
+    export ZELLIJ_TMP_DIR=$SINIMAGE_DIR/.zellij
+    export SCREENDIR=$SINIMAGE_DIR/tmp/S-$USER
+    export ZDOTDIR=$SINIMAGE_DIR
+
+    if [ ! -f "$SINIMAGE_DIR/.zshrc" ]; then
+        echo "CP1"
+        mkdir -p $SCREENDIR
+        chmod 700 $SCREENDIR
+        mkdir -p $SINIMAGE_DIR/.zellij
+        mkdir -p $SINIMAGE_DIR/amumax
+        cp /opt/conda/bin/amumax $SINIMAGE_DIR/amumax/
+        cp /opt/conda/bin/libcufft.so.10 $SINIMAGE_DIR/amumax/
+        cp /opt/conda/bin/libcurand.so.10 $SINIMAGE_DIR/amumax/
+        export PATH=$SINIMAGE_DIR/amumax:$PATH
+        chmod 700 $SINIMAGE_DIR/.zellij    
+    else
+        echo "CP1 passed"
+    fi
+
+    if [ ! -f "$SINIMAGE_DIR/.config/starship.toml" ]; then
+        echo "CP2"
+        cp /opt/temp_files/starship.toml "$SINIMAGE_DIR/.config/starship.toml"
+        chmod 644 $SINIMAGE_DIR/.config/starship.toml
+    else
+        echo "CP2 passed"
+    fi
+    
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Load nvm
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # Load nvm bash_completion
+
+    . /opt/conda/etc/profile.d/conda.sh
+    
+    if [ ! -f "$SINIMAGE_DIR/.local/share/code-server/extensions/extensions.json" ]; then
+        rclone copy /opt/code-server-settings/code-server "$SINIMAGE_DIR/.local/share/code-server" --progress
+    else
+        echo "CP3 passed"
+    fi
+    
+    exec zsh

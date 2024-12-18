@@ -1,9 +1,8 @@
 eval "$(starship init zsh)"
-eval "$(atuin init zsh)"
 eval "$(zoxide init zsh)"
 
-bindkey "^[[1;5C" forward-word
-bindkey "^[[1;5D" backward-word
+
+eval "$(atuin init zsh --disable-up-arrow)"
 
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
@@ -126,3 +125,4 @@ alias reload="source ~/.zshrc && echo 'Configuration reloaded!'"
 
 mkdir -p /tmp/runtime-$(id -u)
 export XDG_RUNTIME_DIR=/tmp/runtime-$(id -u)
+export VSCODE_IPC_HOOK_CLI=""

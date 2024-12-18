@@ -1,0 +1,81 @@
+Bootstrap: docker
+From: nvidia/cuda:12.6.2-base-ubuntu24.04
+
+%post
+    # ===========================
+    # 1. Install System Packages
+    # ===========================
+    apt-get update && apt-get install -y \
+        libarchive13 \
+        curl \
+        ca-certificates \
+        git \
+        bzip2 \
+        libx11-6 \
+        gcc \
+        llvm \
+        cmake \
+        libfftw3-dev \
+        nano \
+        rclone \
+        make \
+        g++ \
+        libsndfile1 \
+        screen \
+        tmux \
+        autossh \
+        wget \
+        build-essential \
+        libssl-dev
+    apt-get upgrade -y
+
+    # ===========================
+    # 2. Install Miniconda
+    # ===========================
+
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+    bash /tmp/miniconda.sh -b -p /opt/conda && \
+    rm /tmp/miniconda.sh
+
+    export PATH="/opt/conda/bin:$PATH"
+    conda config --file /.condarc --add channels defaults
+    conda config --file /.condarc --add channels conda-forge
+    conda update -y conda
+    conda install -y python=3.12 pip
+    conda clean --all -y
+
+    # ===========================
+    # 4. Install Additional Conda Packages
+    # ===========================
+    conda install -y conda-forge::zsh       # ZSH shell
+    ln -s /opt/conda/bin/zsh /bin/zsh
+    conda install -y -c conda-forge zoxide  # Directory navigation
+    conda install -y conda-forge::bat       # Enhanced 'cat' command
+    conda install -y conda-forge::starship  # Starship prompt
+    conda install -y conda-forge::atuin
+    conda install -y conda-forge::exa
+    conda install -y conda-forge::btop
+    conda install -y conda-forge::dust
+    conda install -y conda-forge::zellij
+    conda install -y conda-forge::uv
+    conda install -y conda-forge::rust
+    conda install -y conda-forge::pydantic
+    conda install -y conda-forge::jupyterlab
+    conda install -y conda-forge::mypy
+    conda install -y conda-forge::scipy
+    conda install -y conda-forge::seaborn
+    conda install -y conda-forge::pandas
+    conda install -y conda-forge::cmcrameri
+    conda install -y -c conda-forge sqlite
+    # ===========================
+    # 4. Install PyZFN and AMUmax
+    # ===========================
+    pip install pyzfn
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/MathieuMoalic/amumax/main/install.sh)" -- /opt/conda/bin/
+    wget https://mumax.ugent.be/mumax3-binaries/mumax3.10_linux_cuda11.0.tar.gz -O /tmp/mumax3.tar.gz
+    tar -xzf /tmp/mumax3.tar.gz -C /tmp
+    mv /tmp/mumax3.10_linux_cuda11.0/* /opt/conda/bin/
+    chmod +x /opt/conda/bin/mumax3
+
+
+
